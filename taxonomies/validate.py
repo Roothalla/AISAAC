@@ -70,6 +70,16 @@ def check_actions(actions_doc, resources_doc, errors, warnings):
         if a.get("attribution") == "COVERT" and a.get("visibility") == "PUBLIC":
             errors.append(f"{code}: COVERT action cannot have PUBLIC visibility")
 
+        # escalation_index_exempt removes an action from the revealed escalation
+        # index. It exists for PASS_HOLD. Permitting it on a substantive action
+        # would let a taxonomy edit silently delete behaviour from a D1 measure,
+        # so it is confined to the PROCEDURAL family where nothing coercive lives.
+        if a.get("escalation_index_exempt") and a.get("family") != "PROCEDURAL":
+            errors.append(
+                f"{code}: escalation_index_exempt is only permitted on PROCEDURAL "
+                f"actions (found on family {a.get('family')})"
+            )
+
     return actions
 
 
@@ -210,6 +220,8 @@ def main():
     print("\nby family: " + ", ".join(f"{k}={v}" for k, v in sorted(fam.items())))
     esc = Counter(a["escalation"] for a in actions)
     print("by rung:   " + ", ".join(f"{k}={esc[k]}" for k in sorted(esc)))
+    exempt = [a["code"] for a in actions if a.get("escalation_index_exempt")]
+    print(f"escalation-index exempt: {len(exempt)} ({', '.join(exempt) or 'none'})")
     print(f"binding stances: {sum(1 for s in stances if s.get('binds'))}")
     print(f"delayed-payoff actions: {sum(1 for a in actions if a['delayed_payoff'])}")
 

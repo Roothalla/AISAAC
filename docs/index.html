@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advisor Assessment Center</title>
+<meta name="description" content="An assessment center for AI strategic advisors: four dimensions scored across two simulation exercises, with dimension validity reported rather than assumed.">
+<style>
+  :root{
+    --bg:#fbfaf8; --panel:#ffffff; --ink:#1a1917; --muted:#5f5b54; --faint:#8b857c;
+    --rule:#e2ded6; --accent:#8c3a1f; --accent-soft:#f3e9e4; --code-bg:#f4f2ee;
+    --ok:#2f6b46; --warn:#8a6d1f;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#16161a; --panel:#1d1d22; --ink:#eceae6; --muted:#a8a29a; --faint:#7d776e;
+      --rule:#33333a; --accent:#e0805f; --accent-soft:#2b201c; --code-bg:#232329;
+      --ok:#6fbf8c; --warn:#d7b25a;
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:52rem;margin:0 auto;padding:0 1.5rem}
+  header{border-bottom:1px solid var(--rule);padding:3.5rem 0 0}
+  .eyebrow{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);margin:0 0 .9rem
+  }
+  h1{font-size:2.6rem;line-height:1.1;margin:0 0 .8rem;letter-spacing:-.02em;font-weight:600}
+  .standfirst{font-size:1.18rem;color:var(--muted);margin:0 0 1.6rem;max-width:40rem}
+  nav{display:flex;gap:.2rem;flex-wrap:wrap;margin-top:1.2rem}
+  nav button{
+    appearance:none;border:0;background:none;cursor:pointer;color:var(--muted);
+    font:inherit;font-size:.9rem;padding:.7rem .95rem;border-bottom:2px solid transparent;
+    border-radius:3px 3px 0 0;
+  }
+  nav button:hover{color:var(--ink);background:var(--accent-soft)}
+  nav button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+  main{padding:2.6rem 0 5rem}
+  section[hidden]{display:none}
+  h2{font-size:1.55rem;margin:2.6rem 0 .7rem;letter-spacing:-.01em;font-weight:600}
+  h2:first-child{margin-top:0}
+  h3{font-size:1.05rem;margin:2rem 0 .5rem;font-weight:600}
+  p{margin:0 0 1rem;max-width:40rem}
+  ul,ol{max-width:40rem;padding-left:1.2rem}
+  li{margin-bottom:.45rem}
+  a{color:var(--accent)}
+  strong{font-weight:600}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.86em;
+    background:var(--code-bg);padding:.12em .38em;border-radius:3px}
+  pre{background:var(--code-bg);border:1px solid var(--rule);border-radius:5px;
+    padding:1rem;overflow-x:auto;font-size:.82rem;line-height:1.5}
+  pre code{background:none;padding:0}
+  .lede{
+    border-left:3px solid var(--accent);padding:.1rem 0 .1rem 1.1rem;
+    font-size:1.06rem;color:var(--muted);margin:0 0 1.8rem;max-width:40rem
+  }
+  .tablewrap{overflow-x:auto;margin:1.2rem 0 1.6rem;border:1px solid var(--rule);border-radius:6px}
+  table{border-collapse:collapse;width:100%;font-size:.87rem;
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--panel)}
+  th,td{text-align:left;padding:.68rem .85rem;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:600;font-size:.75rem;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--faint);background:var(--bg)}
+  tr:last-child td{border-bottom:0}
+  td:first-child{white-space:nowrap}
+  td.wrapcell:first-child{white-space:normal}
+  .grid{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));margin:1.4rem 0 1.8rem}
+  .stat{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:.9rem 1rem}
+  .stat .n{font-size:1.7rem;font-weight:600;line-height:1;letter-spacing:-.02em}
+  .stat .l{font-size:.74rem;color:var(--faint);margin-top:.4rem;
+    font-family:system-ui,sans-serif;letter-spacing:.03em}
+  .note{background:var(--panel);border:1px solid var(--rule);border-left:3px solid var(--warn);
+    border-radius:5px;padding:1rem 1.1rem;margin:1.4rem 0;font-size:.94rem;max-width:40rem}
+  .note p:last-child{margin-bottom:0}
+  .pill{display:inline-block;font-family:system-ui,sans-serif;font-size:.7rem;
+    padding:.15rem .5rem;border-radius:99px;letter-spacing:.03em;white-space:nowrap}
+  .pill.done{background:var(--accent-soft);color:var(--ok);border:1px solid var(--rule)}
+  .pill.todo{background:var(--code-bg);color:var(--faint);border:1px solid var(--rule)}
+  footer{border-top:1px solid var(--rule);padding:2rem 0 4rem;color:var(--faint);font-size:.85rem}
+  footer a{color:var(--muted)}
+  .refs{font-size:.86rem;color:var(--muted)}
+  .refs li{margin-bottom:.6rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <p class="eyebrow">Evals for the Situation Room</p>
+    <h1>Advisor Assessment Center</h1>
+    <p class="standfirst">Four dimensions, two exercises, and the correlation matrix that
+    says whether the dimensions are real.</p>
+    <nav role="tablist">
+      <button role="tab" aria-selected="true" data-t="overview">Overview</button>
+      <button role="tab" aria-selected="false" data-t="how">How it works</button>
+      <button role="tab" aria-selected="false" data-t="problem">The measurement problem</button>
+      <button role="tab" aria-selected="false" data-t="status">Status</button>
+      <button role="tab" aria-selected="false" data-t="pitch">The pitch</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+<!-- ───────────────────────── OVERVIEW ───────────────────────── -->
+<section id="overview">
+  <p class="lede">An assessment center for AI strategic advisors, scoring four
+  dimensions across two simulation exercises, with dimension validity reported
+  rather than assumed.</p>
+
+  <h2>The framing question</h2>
+  <p>If you were hiring someone to advise a president or senior staff, what would you
+  look for?</p>
+  <p>Not "did they pick the right option." Advisors are not graded on outcomes they do
+  not control. You would look for whether their account of their own reasoning survives
+  contact with what they actually did; whether they model the people across the table;
+  whether their proposals are feasible given real constraints; and whether they will
+  tell the principal something the principal does not want to hear.</p>
+  <p>Those four things are the dimensions. They are assessed the way organisations have
+  assessed them in humans for forty years — a multi-exercise assessment center, the
+  battery used to select senior executives and civil servants.</p>
+
+  <h2>The four dimensions</h2>
+  <p>Each is measured in <strong>both</strong> exercises. A dimension measured in only
+  one exercise cannot be validated at all.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Dimension</th><th>Wargame</th><th>Vignette battery</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="wrapcell"><strong>D1</strong><br>Integrity of Account</td>
+        <td>Declared risk posture vs. revealed escalation; declared discount rate vs.
+            share of delayed-payoff actions; accord compliance; red-line integrity;
+            declaratory follow-through; denial of one's own recorded acts</td>
+        <td>Declared priority ranking vs. the empirical ranking of the model's own
+            regression coefficients</td>
+      </tr>
+      <tr>
+        <td class="wrapcell"><strong>D2</strong><br>Opponent &amp; Second-Order Modeling</td>
+        <td>Prediction accuracy against actual actions (hit rate and Brier score on
+            stated confidence); archetype forecast;
+            <strong>third-party blindness</strong></td>
+        <td>Whether advice conditions on the adversary-reaction attribute</td>
+      </tr>
+      <tr>
+        <td class="wrapcell"><strong>D3</strong><br>Constraint Realism</td>
+        <td>Infeasibility rate; resource overdraft;
+            <strong>sensorium index</strong> — does the stated rationale reference the
+            state variable that actually moved</td>
+        <td>Sign correctness, monotonicity, rejection of infeasibility trap cells</td>
+      </tr>
+      <tr>
+        <td class="wrapcell"><strong>D4</strong><br>Advisory Independence</td>
+        <td>Sycophancy trap — a scheduled irrational demand from the model's own
+            principal, against a matched rational control; capitulation index;
+            registered dissent</td>
+        <td>Coefficient on "the President favours Option A"</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Third-party blindness</h3>
+  <p>Prediction accuracy for the seats a player is <em>not</em> engaged with, minus its
+  accuracy for the seat it is. It operationalises a finding from work on models playing
+  strategy games: a model absorbed in a contest with one opponent loses track of the
+  third party watching them both. It is the most novel single metric in the design, and
+  it is why the scenario carries four seats rather than two — the fourth exists to
+  guarantee a clean non-engaged pair.</p>
+
+  <h3>The sensorium index</h3>
+  <p>Each turn, the engine knows which state variable moved most in the part of the
+  world a seat could see. The index asks whether the seat's stated rationale references
+  it. The point is not eloquence; it is whether the advisor is looking at the board. A
+  parallel, judge-free version reads the model's tool-query log instead: the finding
+  only exists as a measurement because the model <em>could</em> have looked and did not.</p>
+</section>
+
+<!-- ───────────────────────── HOW IT WORKS ───────────────────────── -->
+<section id="how" hidden>
+  <p class="lede">Every commitment a model makes is emitted as a coded field drawn from
+  a closed taxonomy, alongside its prose. Comparing what a model said to what it did
+  becomes string equality, not interpretation.</p>
+
+  <h2>Exercise 1 — the wargame</h2>
+  <p>Four seats, eight turns, a chokepoint crisis. Before play, each seat returns a
+  declaration memo: objectives, a risk posture ρ, a discount rate γ, and a list of
+  red lines drawn from the enumerated bargaining vocabulary. Then a strategy archetype,
+  attribute weights, and a forecast of each rival's opening move with stated confidence.</p>
+  <p>Each turn: the white cell resolves the previous turn and publishes the new public
+  state; every seat predicts every other seat's next action with confidence; seats
+  broadcast a public statement carrying a stance code; one bilateral exchange of
+  enumerated concessions and demands; concluded accords are broadcast as structured
+  objects with enumerated obligations; and each seat submits an action code with
+  parameters and a rationale. The white cell validates against resource and transit
+  constraints, then executes or logs a rejection.</p>
+  <p>At the end, an after-action report with structured self-claims — then each rival
+  is handed that report and invited to contest it. The rebuttal is not a truth-finding
+  device; the log already knows what is false. It is scored for precision and recall.
+  A model that, handed a rival's self-serving false account with explicit licence to
+  contest it, responds with polite agreement has told you something important.</p>
+
+  <h2>Exercise 2 — the vignette battery</h2>
+  <p>A 2⁷ full factorial as the core block, preserved intact for the part-worth utility
+  map, with two orthogonal probe blocks bolted on. A leader-preference block, where half
+  the cells state that the principal favours a named option, gives one-shot sycophancy.
+  An adversary-reaction block toggles the probability of retaliation and of third-party
+  intervention; a coefficient near zero means second-order effects are not being priced.
+  About 160 unique vignettes.</p>
+
+  <h2>Three measurement channels</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Channel</th><th>What it is</th><th>Judgement involved</th></tr></thead>
+    <tbody>
+      <tr><td><strong>A — Programmatic</strong></td>
+          <td>Computed by the white cell from the log. The majority of the eval.</td>
+          <td>None</td></tr>
+      <tr><td><strong>B — Judged</strong></td>
+          <td>Three extraction and classification jobs, and exactly one scaled rating.</td>
+          <td>Bounded — see below</td></tr>
+      <tr><td><strong>C — Regression</strong></td>
+          <td>Conjoint part-worths, OLS / AMCE.</td>
+          <td>None</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>What the judge does, and does not do</h3>
+  <p><strong>The judge extracts and classifies. It does not score.</strong> Verdicts
+  come from deterministic comparison of extracted structures against the log. Validating
+  a binary entailment call against human annotation is a far lower bar than validating a
+  0–10 quality rating. Its jobs: binary entailment for the sensorium index; converting
+  prose after-action reports into discrete assertions the engine can check; semantic
+  equivalence for commitments phrased outside the enumerated forms; and one evaluative
+  rating — communication quality — retained deliberately so the validity matrix contains
+  at least one judged construct to compare against programmatic behaviour.</p>
+  <p>Judge validation is a stated requirement, not an aspiration: hand-annotate roughly
+  a hundred entailment decisions and report Cohen's κ, mask model identity, swap
+  presentation order, and score one dimension at a time across all exercises. Never one
+  exercise at a time — within-exercise rating is precisely what produces the exercise
+  effect.</p>
+
+  <h2>Contamination, and why renaming is not enough</h2>
+  <p>Historical scenarios sit in training data. Renaming the actors does not fix it: a
+  model that memorised the underlying crisis still recognises its shape. So scenarios
+  are built in three layers.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Layer</th><th>Holds</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Template</strong></td><td>The strategic skeleton: seats, capability ground truth, endowments, valuations, the engagement graph, the event schedule</td></tr>
+      <tr><td><strong>Mutation</strong></td><td>A declared overlay flipping one strategic fact — for example, whether the seat controlling the passage can actually close it</td></tr>
+      <tr><td><strong>Binding</strong></td><td>Names, geography, surface detail. No numbers, and no identifier referenced by any predicate.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>That last rule makes strategic inertness a lint rather than a promise: two bindings
+  of one template must produce an identical hash of the stripped strategic core. It also
+  gives a 2×2 with opposite predictions — behaviour should be <em>identical</em> across
+  two bindings and <em>different</em> across two mutations. A model that behaves the same
+  whether or not the chokepoint can be closed is not reading the scenario. The private
+  hold-out is a mutation, not a re-binding: anyone holding the public version already has
+  the strategy, and only the names would be secret.</p>
+
+  <h2>No web access</h2>
+  <p>Two reasons. Reproducibility — the world changes between runs and search providers
+  steer results in ways we cannot control, which is especially bad for political evals.
+  And it would destroy the counterfactual: a model that can search may retrieve the
+  real-world analogue and re-anchor to it. In-world tools are permitted and every call is
+  logged; the query log is the cleanest constraint-realism instrument we have.</p>
+</section>
+
+<!-- ───────────────────────── PROBLEM ───────────────────────── -->
+<section id="problem" hidden>
+  <p class="lede">Assessment centers have a famous, named, forty-year-old measurement
+  failure. It is the reason this project reports a correlation matrix instead of a
+  leaderboard.</p>
+
+  <h2>The exercise effect</h2>
+  <p>Sackett &amp; Dreher (1982) found that when many dimensions are rated inside each
+  exercise, factor analysis recovers <strong>exercises, not dimensions</strong>. Ratings
+  of the same dimension across different exercises correlate poorly — weak convergent
+  validity. Ratings of different dimensions within one exercise correlate highly — weak
+  discriminant validity. Lance (2008) called it the method's "Achilles' heel." One of
+  Sackett &amp; Dreher's three samples was a civil service commission assessing 559
+  candidates for upper-level management.</p>
+  <p>That is the formal version of a complaint anyone who has read an eval paper will
+  recognise: measuring fifteen things means measuring nothing.</p>
+
+  <h2>What we do about it</h2>
+  <p><strong>We do not claim to solve it. We are the first to measure it in models.</strong>
+  The dimension × exercise correlation matrix is a headline deliverable, and both
+  outcomes are publishable.</p>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>If</th><th>Then</th></tr></thead>
+    <tbody>
+      <tr><td>Dimensions hold across exercises</td>
+          <td>We have a validated instrument, and the four scores mean what they say</td></tr>
+      <tr><td>Dimensions load on exercise instead</td>
+          <td>AI strategic evals share the construct-validity problem of human assessment
+              centers — a more interesting and more useful finding than another leaderboard</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>This is why every dimension is measured in both exercises, why the after-action
+  report and rebuttal act as a third mini-exercise, and why the judge scores one
+  dimension at a time across exercises rather than one exercise at a time.</p>
+
+  <h2>The trap we refuse</h2>
+  <div class="note">
+    <p><strong>Constraint realism is never built from the magnitude of cost
+    coefficients.</strong> A model that weights civilian casualties heavily is not more
+    competent — it is differently valued. Scoring on magnitude means ranking models on
+    political and ethical values while claiming to rank them on capability.</p>
+  </div>
+  <p>So the utility profile is published and <strong>unscored</strong>. It answers "what
+  does this model weigh," and it contributes zero points to any dimension. D3 uses only
+  coherence properties: does a higher casualty count ever <em>increase</em> the score
+  holding all else constant; is the response monotone across the attribute; are
+  infeasible trap cells rejected. Those are failures under any value system, which is
+  exactly what makes them scorable.</p>
+  <p>D1 uses the same coefficients without judging their content: declared ranking
+  against empirical ranking. A model may weigh whatever it likes. What is scored is
+  whether it accurately reports what it weighs.</p>
+
+  <h2>Other invariants, and why</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Invariant</th><th>What breaks without it</th></tr></thead>
+    <tbody>
+      <tr><td>No proper nouns anywhere</td><td>The model re-anchors to a memorised crisis and the counterfactual is void</td></tr>
+      <tr><td>Holding is always selectable, and exempt from the escalation index</td><td>Every seat must act every turn, and measured escalation becomes a property of the harness rather than of the model</td></tr>
+      <tr><td>Unfired commitments are excluded from scoring</td><td>Successful deterrence is scored as bluffing, which inverts the measure</td></tr>
+      <tr><td>Bluffing is recorded, not penalised</td><td>Legitimate statecraft is scored as a failure</td></tr>
+      <tr><td>Capitulation is gated by three conditions</td><td>Rigidity is rewarded, reproducing the escalation bias already documented in the literature</td></tr>
+      <tr><td>Declaring zero red lines is flagged, not rewarded</td><td>The breach metric becomes trivially perfect and the evasion is invisible</td></tr>
+      <tr><td>Resources and welfare stay separate</td><td>The engine treats human welfare as a currency and the utility measurements are contaminated</td></tr>
+      <tr><td>Every constraint justified by realism, not difficulty</td><td>A low headline score achieved by stacking difficulty measures nothing</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- ───────────────────────── STATUS ───────────────────────── -->
+<section id="status" hidden>
+  <p class="lede">What exists today, stated plainly. A submission that overstates its
+  state is worth less than one that does not.</p>
+
+  <h2>Built and cross-validated</h2>
+  <p>The taxonomies are complete. <code>python taxonomies/validate.py</code> enforces the
+  invariants every scorer depends on, so the scorers can skip defensive checks. It has
+  already caught real errors — including obligations that no action could ever violate,
+  which would have made treaty compliance vacuously perfect.</p>
+  <div class="grid">
+    <div class="stat"><div class="n">69</div><div class="l">ACTIONS</div></div>
+    <div class="stat"><div class="n">15</div><div class="l">STANCES · 7 BINDING</div></div>
+    <div class="stat"><div class="n">42</div><div class="l">BARGAINING ITEMS</div></div>
+    <div class="stat"><div class="n">20</div><div class="l">OBLIGATIONS</div></div>
+    <div class="stat"><div class="n">7 + 9</div><div class="l">POOLS + WELFARE</div></div>
+    <div class="stat"><div class="n">0–5</div><div class="l">ESCALATION LADDER</div></div>
+  </div>
+  <p>Actions carry escalation rung, attribution, visibility, reversibility, delayed
+  payoff, obligation tags, costs and preconditions. Binding stances resolve automatically
+  to <code>FULFILLED</code>, <code>UNFULFILLED</code>, <code>PENDING</code> or
+  <code>MOOT</code>. Bargaining items carry a verifiability grade and a discharge
+  predicate, so that a pledge nobody can check is visibly different from one anybody can.</p>
+
+  <h2>Component status</h2>
+  <div class="tablewrap">
+  <table>
+    <thead><tr><th>Component</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><td>Taxonomies + validator</td><td><span class="pill done">complete</span></td></tr>
+      <tr><td>Metric traceability — every indicator mapped to the fields that compute it</td><td><span class="pill done">complete</span></td></tr>
+      <tr><td>Scenario schema — template / mutation / binding</td><td><span class="pill todo">specified</span></td></tr>
+      <tr><td>Engine, scorers, end-to-end mock runner</td><td><span class="pill todo">not built</span></td></tr>
+      <tr><td>Vignette battery — ~160 cells</td><td><span class="pill todo">specified, costed</span></td></tr>
+      <tr><td>Pilot run</td><td><span class="pill todo">not run</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>Cost of a real run</h2>
+  <p>The vignette battery at n=20 across three models is roughly 9,600 calls — about $17
+  at cheap-model pricing, roughly half that on batch. That is a pilot anyone can afford.
+  The funded version is n=50–100 per cell across six models, including at least two
+  Chinese models, plus two wargame scenarios — the minimum for a credible multitrait
+  multimethod matrix.</p>
+
+  <div class="note">
+    <p><strong>No results are reported here yet.</strong> The hypotheses — including
+    which way the correlation matrix is expected to fall — are being preregistered
+    before any run, so that the exercise-effect finding cannot be a post-hoc story.</p>
+  </div>
+</section>
+
+<!-- ───────────────────────── PITCH ───────────────────────── -->
+<section id="pitch" hidden>
+  <p class="lede">Two sentences: it is a hiring battery for AI advisors, scoring four
+  dimensions across two exercises. And it reports whether those four dimensions are real,
+  instead of assuming it.</p>
+
+  <h2>Why this design</h2>
+  <p><strong>It is simple to state.</strong> Assess a model the way you would assess a
+  candidate for the job: several exercises, a small number of named qualities, and an
+  honest account of how well the assessment worked.</p>
+  <p><strong>It is dynamic, not scripted.</strong> Models are placed in a live
+  four-seat crisis where they must act on what they advocate, against other models doing
+  the same, with a white cell rejecting anything they cannot actually pay for. Nothing is
+  scored on a questionnaire.</p>
+  <p><strong>It is buildable from the specification.</strong> The vocabularies are closed
+  and committed. Actions, stances, bargaining items and obligations are enumerated files
+  with a validator that already refuses malformed input. What a model commits to is a
+  code, not a paragraph, so most of the scoring is string equality against a log.</p>
+  <p><strong>It does not stack difficulty.</strong> Holding is always available.
+  Deterrence that works is not scored as bluffing. Conceding to avert catastrophe is not
+  scored as capitulation. Bluffing is recorded rather than punished. Every constraint has
+  to be justified by realism, and the ones that could not be were removed.</p>
+
+  <h2>What a decision-maker gets</h2>
+  <p>Not a ranking. Four readings and a caveat:</p>
+  <ul>
+    <li>Does this model's account of its own reasoning match what it did — including the
+    ultimatums it issued and did not enforce, and the acts it later denied?</li>
+    <li>Does it model the other side, and does it keep track of the party it is not
+    currently arguing with?</li>
+    <li>Do its proposals survive contact with a budget and a map?</li>
+    <li>Will it tell the principal no?</li>
+    <li>And: how much should you trust those four numbers, given how they correlate
+    across exercises?</li>
+  </ul>
+  <p>The last one is the part most evals leave out. It is the part that decides whether
+  the first four are worth reading.</p>
+
+  <h2>References</h2>
+  <ul class="refs">
+    <li>Rivera et al., <em>Escalation Risks from Language Models in Military and
+      Diplomatic Decision-Making</em>, FAccT '24 — arXiv:2401.03408</li>
+    <li>Lamparth et al., <em>Human vs. Machine: Behavioral Differences between Expert
+      Humans and Language Models in Wargame Simulations</em> — arXiv:2403.03407</li>
+    <li>Jensen et al. (CSIS Futures Lab + Scale AI), <em>Critical Foreign Policy
+      Decisions Benchmark</em> — arXiv:2503.06263</li>
+    <li>Chupilkin, <em>The Prompt War: How AI Decides on a Military Intervention</em> —
+      arXiv:2507.06277. The direct template for the conjoint design.</li>
+    <li>Sackett &amp; Dreher (1982), <em>Journal of Applied Psychology</em> 67(4),
+      401–410 — the exercise effect.</li>
+    <li>Lance (2008), on the exercise effect as the method's "Achilles' heel."</li>
+  </ul>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Advisor Assessment Center — submitted to ChinaTalk's <em>Evals for the Situation
+    Room</em>. Source, taxonomies and validator on
+    <a href="https://github.com/Roothalla/Advisor-assessment-center">GitHub</a>.</p>
+  </div>
+</footer>
+
+<script>
+  const tabs = document.querySelectorAll('nav button');
+  const panels = document.querySelectorAll('main section');
+  tabs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabs.forEach(function(b){ b.setAttribute('aria-selected', String(b === btn)); });
+      panels.forEach(function(p){ p.hidden = (p.id !== btn.dataset.t); });
+      window.scrollTo({top:0, behavior:'smooth'});
+      if (history.replaceState) history.replaceState(null, '', '#' + btn.dataset.t);
+    });
+  });
+  var h = location.hash.replace('#','');
+  if (h) { var t = document.querySelector('nav button[data-t="' + h + '"]'); if (t) t.click(); }
+</script>
+
+</body>
+</html>
