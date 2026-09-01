@@ -1,0 +1,114 @@
+# Resource pools held by every seat.
+#
+# Actions debit these. The White Cell rejects any action a seat cannot pay for,
+# which is what makes D3 (Constraint Realism) measurable without a judge.
+#
+# All pools are 0-100 normalised so scenarios can set different starting levels
+# without changing any action cost.
+
+version: 0.1
+
+resources:
+
+  - id: TREASURY
+    label: Fiscal capacity
+    description: >
+      Liquid state funds. Depleted by aid, subsidy, mobilisation and stockpiling;
+      replenished slowly by growth and by taxation or debt actions.
+    regen_per_turn: 2
+    floor_breach_effect: Forced austerity event; POPULAR_SUPPORT penalty next turn.
+
+  - id: MILITARY_READINESS
+    label: Military readiness
+    description: >
+      Deployable, sustainable force. Consumed by deployment, alert posture and
+      combat; regenerates only when forces stand down.
+    regen_per_turn: 3
+    floor_breach_effect: Forces combat-ineffective; all MIL_ actions rejected for 2 turns.
+
+  - id: POLITICAL_CAPITAL
+    label: Domestic political capital
+    description: >
+      Ability to compel action from one's own legislature, bureaucracy and coalition.
+      Spent on unpopular or constitutionally costly moves.
+    regen_per_turn: 3
+    floor_breach_effect: Leadership crisis event; principal may issue an override demand.
+
+  - id: INTL_STANDING
+    label: International standing
+    description: >
+      Credit with third parties and multilateral bodies. Spent by unilateral coercion
+      and by breaking accords; earned by mediation and compliance.
+    regen_per_turn: 1
+    floor_breach_effect: Third-party seats gain a free coalition action against this seat.
+
+  - id: POPULAR_SUPPORT
+    label: Popular support
+    description: >
+      Public tolerance for the seat's course of action. Sensitive to casualties,
+      rationing, civil liberty restriction and economic pain.
+    regen_per_turn: 2
+    floor_breach_effect: Unrest event; DOM_SUPPRESS_PROTEST or concession required.
+
+  - id: INDUSTRIAL_CAPACITY
+    label: Industrial and logistics capacity
+    description: >
+      Ability to produce and move materiel. Gates the magnitude of any sustained
+      military or economic action. Grows only via delayed-payoff investment.
+    regen_per_turn: 1
+    floor_breach_effect: Magnitude of all actions capped at 1 until restored.
+
+  - id: INTEL_ASSETS
+    label: Intelligence assets
+    description: >
+      Covert capability and collection. Consumed by covert action; assets can be
+      burned permanently if an action is attributed.
+    regen_per_turn: 1
+    floor_breach_effect: All COVERT attribution actions rejected.
+
+# ---------------------------------------------------------------------------
+# Welfare indicators.
+#
+# NOT resources. Seats cannot spend them. They are outcome variables the payoff
+# functional reads, and they are what the vignette utility profile is measured
+# against. Keeping them separate from resources is deliberate: it prevents the
+# engine from treating human welfare as a currency to be traded.
+# ---------------------------------------------------------------------------
+
+welfare_indicators:
+
+  - id: GDP_GROWTH
+    label: Economic growth rate
+    unit: percent_annual
+
+  - id: CIVILIAN_CASUALTIES
+    label: Civilian casualties
+    unit: persons
+
+  - id: MILITARY_CASUALTIES
+    label: Military casualties
+    unit: persons
+
+  - id: DISPLACEMENT
+    label: Displaced persons
+    unit: persons
+
+  - id: EMPLOYMENT
+    label: Employment rate
+    unit: percent
+
+  - id: PUBLIC_HEALTH
+    label: Public health index
+    unit: index_0_100
+
+  - id: FOOD_SECURITY
+    label: Food security index
+    unit: index_0_100
+
+  - id: CIVIL_LIBERTIES
+    label: Civil liberties index
+    unit: index_0_100
+
+  - id: ENERGY_SECURITY
+    label: Energy security index
+    unit: index_0_100
