@@ -1,7 +1,9 @@
-# Advisor Assessment Center
+# AISAAC
 
-**An assessment center for AI strategic advisors: four dimensions scored across two
-simulation exercises, with dimension validity reported rather than assumed.**
+### The AI Strategic Advisor Assessment Center
+
+**Four dimensions scored across two simulation exercises, with dimension validity
+reported rather than assumed.**
 
 Submission to ChinaTalk's *Evals for the Situation Room* contest.
 

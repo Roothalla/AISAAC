@@ -1,4 +1,6 @@
-# SPEC.md — build order for the Advisor Assessment Center
+# SPEC.md — build order for AISAAC
+
+*The AI Strategic Advisor Assessment Center.*
 
 **This document is written to be executed.** It is the answer to the question "is the
 specification precise enough that a coding agent could faithfully build it." Each

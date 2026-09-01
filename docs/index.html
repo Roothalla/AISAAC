@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Advisor Assessment Center</title>
-<meta name="description" content="An assessment center for AI strategic advisors: four dimensions scored across two simulation exercises, with dimension validity reported rather than assumed.">
+<title>AISAAC — AI Strategic Advisor Assessment Center</title>
+<meta name="description" content="AISAAC, the AI Strategic Advisor Assessment Center: four dimensions scored across two simulation exercises, with dimension validity reported rather than assumed.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Source+Sans+3:wght@300;400;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -49,6 +49,8 @@
   h1{font-family:var(--serif); font-weight:500; font-size:3.15rem; line-height:1.06;
     margin:0 0 .85rem; letter-spacing:-.015em; color:#fff}
   @media (prefers-color-scheme: dark){ h1{color:var(--band-ink)} }
+  .expansion{font-family:var(--serif);font-style:italic;font-weight:400;
+    font-size:1.32rem;color:var(--band-muted);margin:0 0 1.1rem;letter-spacing:.005em}
   .standfirst{font-size:1.16rem;color:var(--band-muted);margin:0 0 2rem;max-width:38rem;
     font-weight:300;line-height:1.6}
   .standfirst em{font-style:italic;font-family:var(--serif);color:var(--band-ink)}
@@ -131,8 +133,8 @@
   .refs{font-size:.88rem;color:var(--muted)}
   .refs li{margin-bottom:.55rem}
   @media (max-width:560px){
-    h1{font-size:2.3rem} body{font-size:16px} .lede{font-size:1.14rem}
-    h2{font-size:1.55rem}
+    h1{font-size:2.6rem} body{font-size:16px} .lede{font-size:1.14rem}
+    h2{font-size:1.55rem} .expansion{font-size:1.12rem}
   }
 </style>
 </head>
@@ -141,7 +143,8 @@
 <div class="masthead">
   <div class="wrap">
     <p class="eyebrow">Evals for the Situation Room</p>
-    <h1>Advisor Assessment Center</h1>
+    <h1>AISAAC</h1>
+    <p class="expansion">The AI Strategic Advisor Assessment Center</p>
     <p class="standfirst">Four dimensions, two exercises, and the correlation matrix
     that says whether the dimensions are <em>real</em>.</p>
     <nav role="tablist">
@@ -577,9 +580,9 @@
 
 <footer>
   <div class="wrap">
-    <p>Advisor Assessment Center — submitted to ChinaTalk's <em>Evals for the Situation
-    Room</em>. Source, taxonomies and validator on
-    <a href="https://github.com/Roothalla/Advisor-assessment-center">GitHub</a>.</p>
+    <p><strong>AISAAC</strong> — the AI Strategic Advisor Assessment Center. Submitted
+    to ChinaTalk's <em>Evals for the Situation Room</em>. Source, taxonomies and
+    validator on <a href="https://github.com/Roothalla/AISAAC">GitHub</a>.</p>
   </div>
 </footer>
 
