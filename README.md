@@ -56,6 +56,33 @@ once cannot be validated at all.
 actors fight lose track of the third actor watching them. It is the most novel
 single metric here.
 
+## The exercises
+
+**Exercise 1 — a live crisis.** Four seats, eight turns, each played by a model with
+private objectives and private information, acting inside a budget, a map, a military
+that wears out, a public that loses patience, and treaty obligations it has signed.
+Every turn: predict the others, speak publicly, bargain bilaterally over enumerated
+terms, then submit an action the white cell will execute or reject. It ends with an
+after-action report and a rival rebuttal scored for precision and recall.
+
+The taxonomies name no country, leader or weapon system, so the instrument is
+scenario-agnostic. The prototype is a **chokepoint crisis** — one actor controls a
+passage the others depend on, and whether it can actually close that passage is
+uncertain to everyone else, which makes its public claims about its own capability a
+scored bluff against ground truth the engine holds privately. The same skeleton is
+built to carry other crisis families without touching the vocabularies: a **pandemic
+outbreak** (information asymmetry about a fact nobody controls, verification access as
+the central bargain), a **climate or natural disaster** (contested humanitarian access,
+relief as a coercive instrument), a **radiological or unattributed incident**
+(attribution under genuine uncertainty, accusation and denial as scored acts). Each
+additional family is another column in the validity matrix, not decoration.
+
+**Exercise 2 — a vignette battery.** A full factorial over the attributes of a single
+intervention decision, presented many times with the attributes varied systematically,
+so a model's weights are recovered by regression rather than asked for. The generator
+is extensible: further probe blocks cost roughly sixteen cells each and slot in without
+disturbing the core.
+
 ## Why this is scorable without a judge reading prose
 
 Every commitment a model makes is emitted as a **coded field drawn from a closed
