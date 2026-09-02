@@ -128,6 +128,15 @@
   .example p{font-size:.96rem;margin-bottom:.7rem}
   .example p:last-child{margin-bottom:0}
 
+  .terminal{background:var(--band);border:1px solid var(--band-rule);border-radius:6px;
+    padding:1.1rem 1.25rem;overflow-x:auto;margin:1.3rem 0 .9rem;
+    font-family:var(--mono);font-size:.76rem;line-height:1.65;color:var(--band-muted);
+    white-space:pre}
+  .terminal .ok{color:var(--tech);font-weight:500}
+  .terminal .hl{color:#fff}
+  @media (prefers-color-scheme: dark){ .terminal .hl{color:var(--band-ink)} }
+  .terminal .cmd{color:var(--tech)}
+
   footer{border-top:1px solid var(--rule);padding:2.2rem 0 4rem;color:var(--faint);font-size:.86rem}
   footer a{color:var(--muted)}
   .refs{font-size:.88rem;color:var(--muted)}
@@ -260,7 +269,7 @@
   becomes string equality, not interpretation.</p>
 
   <h2>Exercise 1 — the live crisis</h2>
-  <p>Four seats, eight turns, one crisis. Each seat is played by a model, each holds
+  <p>Four seats, twelve turns, one crisis. Each seat is played by a model, each holds
   private objectives and private information, and each must act inside real constraints:
   a budget, a map, a military that can be worn out, a public that can lose patience, and
   a set of treaty obligations it has signed.</p>
@@ -382,6 +391,8 @@
   whether or not the passage can be closed is not reading the scenario. The private
   hold-out is therefore a mutation, not a re-binding: anyone holding the public version
   already has the strategy, and only the names would be secret.</p>
+  <p>None of this is asserted. <code>scenarios/lint.py</code> checks it, and runs in
+  continuous integration on every push. See <strong>Status</strong> for the output.</p>
 
   <h2>No web access</h2>
   <p>Two reasons. Reproducibility — the world changes between runs, and search providers
@@ -490,16 +501,64 @@
   to <code>FULFILLED</code>, <code>UNFULFILLED</code>, <code>PENDING</code> or
   <code>MOOT</code>. Bargaining items carry a verifiability grade and a discharge
   predicate, so that a pledge nobody can check is visibly different from one anybody
-  can.</p>
+  can. Three further vocabularies were added to close gaps the scorers depend on:
+  five capabilities with the conditions that put a claim to the test, a closed grammar
+  of fifty-three predicates, and seven strategy archetypes with five dissent codes.</p>
+
+  <h2>The contamination argument, as a runnable check</h2>
+  <p>The three-layer scenario model makes a claim: a binding is strategically inert, so
+  two bindings of one skeleton are the same instrument, while a mutation of that skeleton
+  is a different one. That claim is worth very little as prose. Here it is a check that
+  passes or does not.</p>
+  <p><code>chokepoint.v1</code> is bound twice — once as a maritime strait, once as a
+  rail-and-pipeline land corridor — and mutated once, by flipping whether the actor
+  controlling the passage can genuinely close it.</p>
+
+  <div class="terminal"><span class="cmd">$ python scenarios/lint.py</span>
+
+  binding                       strategic_core_hash
+  <span class="hl">inst01                        51fc4e5d097dcc04</span>
+  <span class="hl">inst02                        51fc4e5d097dcc04</span>
+  <span class="hl">inst01 + mutation m01         f3d51d093bfae31a</span>
+
+  [<span class="ok">OK </span>]  two bindings of one skeleton hash identically
+  [<span class="ok">OK </span>]  mutation changes the strategic core
+  [<span class="ok">OK </span>]  bindings contain no numeric literals
+  [<span class="ok">OK </span>]  bindings label every strategic identifier
+
+  m01 declared mutations: 1
+    seats[SEAT_A].capability_table.CAP_CLOSE_CORRIDOR.held
+  m01 actual diff vs parent: 1 field(s)
+
+<span class="ok">OK (0 warning(s))</span></div>
+
+  <p>Three checks doing three different jobs. Hash equality across bindings proves the
+  <em>resolver</em> does not leak surface detail into strategy. The numeric-literal and
+  label checks prove the <em>bindings</em> carry no strategy to leak — hash equality
+  alone would pass trivially if the resolver simply ignored bindings. The mutation diff
+  proves the overlay changed exactly the one field it declares, and nothing else.</p>
+  <p>The linter also refuses a scenario whose metrics cannot fire: no guaranteed
+  non-engaged pair, a missing fixture, an irrational instruction from a principal with no
+  matched rational control, a seat that cannot afford any delayed-payoff action, a state
+  predicate with no initial value. A metric that structurally cannot produce an
+  observation is worse than a biased one — it contributes no variance, so it cannot
+  correlate with anything, and it quietly drags down its dimension in the correlation
+  matrix that is the point of the whole project.</p>
+  <div class="note">
+    <p>It found a real bug on its first run. A missing space after a colon meant four
+    seats silently had no ground truth for a capability that was in play — exactly the
+    class of error that otherwise surfaces as an unexplained crash three steps later.</p>
+  </div>
 
   <h2>Component status</h2>
   <div class="tablewrap">
   <table>
     <thead><tr><th>Component</th><th>State</th></tr></thead>
     <tbody>
-      <tr><td>Taxonomies and validator</td><td><span class="pill done">complete</span></td></tr>
+      <tr><td>Taxonomies and validator — seven vocabularies</td><td><span class="pill done">complete</span></td></tr>
       <tr><td>Metric traceability — every indicator mapped to the fields that compute it</td><td><span class="pill done">complete</span></td></tr>
-      <tr><td>Scenario schema — template / mutation / binding</td><td><span class="pill todo">specified</span></td></tr>
+      <tr><td>Build specification — <code>SPEC.md</code>, written as an execution order with acceptance gates</td><td><span class="pill done">complete</span></td></tr>
+      <tr><td>Scenario layer — template, mutation, two bindings, linter</td><td><span class="pill done">complete</span></td></tr>
       <tr><td>Engine, scorers, end-to-end mock runner</td><td><span class="pill todo">not built</span></td></tr>
       <tr><td>Vignette battery — ~160 cells</td><td><span class="pill todo">specified, costed</span></td></tr>
       <tr><td>Pilot run</td><td><span class="pill todo">not run</span></td></tr>

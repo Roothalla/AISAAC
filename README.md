@@ -1,5 +1,7 @@
 # AISAAC
 
+[![checks](https://github.com/Roothalla/AISAAC/actions/workflows/checks.yml/badge.svg)](https://github.com/Roothalla/AISAAC/actions/workflows/checks.yml)
+
 ### The AI Strategic Advisor Assessment Center
 
 **Four dimensions scored across two simulation exercises, with dimension validity
@@ -60,7 +62,7 @@ single metric here.
 
 ## The exercises
 
-**Exercise 1 — a live crisis.** Four seats, eight turns, each played by a model with
+**Exercise 1 — a live crisis.** Four seats, twelve turns, each played by a model with
 private objectives and private information, acting inside a budget, a map, a military
 that wears out, a public that loses patience, and treaty obligations it has signed.
 Every turn: predict the others, speak publicly, bargain bilaterally over enumerated
@@ -76,8 +78,13 @@ built to carry other crisis families without touching the vocabularies: a **pand
 outbreak** (information asymmetry about a fact nobody controls, verification access as
 the central bargain), a **climate or natural disaster** (contested humanitarian access,
 relief as a coercive instrument), a **radiological or unattributed incident**
-(attribution under genuine uncertainty, accusation and denial as scored acts). Each
-additional family is another column in the validity matrix, not decoration.
+(attribution under genuine uncertainty, accusation and denial as scored acts).
+
+A point of precision, since it is easy to overstate: additional crisis families are not
+additional *methods* in the validity design. The methods are the exercises — the live
+crisis, the vignette battery, and the after-action report and rebuttal. More families
+buy statistical power and generalisability across situations; they do not add a column
+to the matrix.
 
 **Exercise 2 — a vignette battery.** A full factorial over the attributes of a single
 intervention decision, presented many times with the attributes varied systematically,
@@ -117,10 +124,14 @@ failures under any value system, which is what makes them scorable.
 
 ## Built and validated
 
-`taxonomies/` is complete and cross-validated. Run it:
+Two things in this repository run today, with no API key and no cost. Both run in CI
+on every push, so the badge above is the current state, not a claim about it.
 
 ```
-python taxonomies/validate.py
+pip install pyyaml
+
+python taxonomies/validate.py     # cross-file taxonomy invariants
+python scenarios/lint.py          # the contamination argument, as a check
 ```
 
 | | |
@@ -136,6 +147,40 @@ The validator enforces the invariants the scorers depend on, so scorers can skip
 defensive checks. It has already caught real errors — including obligations that no
 action could ever violate, which would have made treaty compliance vacuously
 perfect.
+
+### The contamination argument, as a runnable check
+
+`scenarios/lint.py` is where the three-layer scenario model stops being a claim.
+`chokepoint.v1` is bound twice — once as a maritime strait, once as a rail-and-pipeline
+land corridor — and mutated once. It prints:
+
+```
+  binding                       strategic_core_hash
+  inst01                        51fc4e5d097dcc04
+  inst02                        51fc4e5d097dcc04
+  inst01 + mutation m01         f3d51d093bfae31a
+
+  [OK ]  two bindings of one skeleton hash identically
+  [OK ]  mutation changes the strategic core
+  [OK ]  bindings contain no numeric literals
+  [OK ]  bindings label every strategic identifier
+```
+
+Three checks, doing three different jobs. Hash equality across bindings proves the
+*resolver* does not leak surface detail into strategy. The numeric-literal and label
+checks prove the *bindings* carry no strategy to leak — hash equality alone would pass
+trivially if the resolver simply ignored bindings. And the mutation diff proves the
+overlay changed exactly the one field it declares and nothing else.
+
+The linter also refuses a scenario whose metrics cannot fire: no non-engagement
+guarantee, a missing fixture, an irrational principal demand with no matched rational
+control, a seat that cannot afford any delayed-payoff action, or a state predicate with
+no initialiser. A metric that structurally cannot produce an observation is worse than a
+biased one — it contributes no variance, so it cannot correlate with anything, and it
+quietly drags down its dimension in the matrix that is the point of the whole project.
+
+It found a real bug on its first run: a missing space after a colon meant four seats
+silently had no ground truth for a capability that was in play.
 
 Design choices visible in the files:
 
@@ -167,9 +212,9 @@ one that does not:
 
 | | Status |
 |---|---|
-| `taxonomies/` | Complete, validated |
+| `taxonomies/` — 7 vocabularies + validator | Complete, validated |
 | Metric traceability — every dimension indicator mapped to the fields that compute it | Complete |
-| Scenario schema — template / mutation / binding | Specified, not written |
+| Scenario schema — template / mutation / binding | Complete for the prototype; lint passes |
 | `engine/`, `scorers/`, `run_demo.py` | Not written |
 | Vignette battery | Specified, ~160 cells, costed |
 | Pilot run | Not run |

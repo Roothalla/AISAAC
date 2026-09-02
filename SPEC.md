@@ -402,7 +402,7 @@ known ground truth.
 python run_demo.py        # no API key, no cost, ~10 seconds
 ```
 
-Runs the entire loop end-to-end with four mock seats over eight turns, writes a JSONL
+Runs the entire loop end-to-end with four mock seats over twelve turns, writes a JSONL
 log, runs every scorer, prints the four dimension scores plus per-indicator detail and the
 `UNDEFINED` count. Judges will spend perhaps five minutes in this repository. This is what
 converts "described" into "real." **Reach it before polishing anything.**
@@ -443,7 +443,7 @@ batch.
 4. One evaluative rating: communication quality — the only scaled score, retained so the
    matrix contains a judged construct to compare against programmatic behaviour.
 
-~50 calls for a four-seat, eight-turn game.
+~65 calls for a four-seat, twelve-turn game.
 
 **Validation protocol, not optional:** hand-annotate ~100 entailment decisions and report
 Cohen's κ; mask model identity; swap presentation order; use behaviourally anchored rubric

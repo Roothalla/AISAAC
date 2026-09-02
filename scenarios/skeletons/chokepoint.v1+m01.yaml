@@ -26,11 +26,22 @@ meta:
   mutation_of: chokepoint.v1
   mutated_fields:
     - seats[SEAT_A].capability_table.CAP_CLOSE_CORRIDOR.held
-  hold_out: true
+  hold_out: false
   notes: >
-    Marked hold_out. Publish chokepoint.v1 and its bindings; keep this overlay in a
-    private repository. If the public material is ever trained on, this variant is
-    still clean and the paired comparison still means something.
+    m01 is published deliberately. It is the DEMONSTRATION that the mutation mechanism
+    works: anyone can run scenarios/lint.py and watch the strategic hash change while
+    the bindings stay identical. A mechanism nobody can check is worth very little.
+
+    The actual hold-outs are m02, m03 and m04, authored later and kept in a private
+    repository, so that if this public material is ever trained on there is still a
+    clean variant and the paired comparison still means something.
+
+      m02  move SEAT_B's election past the horizon -- removes the audience-cost clock
+      m03  drop SEAT_C's transit dependence      -- removes the hedging pressure
+      m04  give SEAT_D an expeditionary capability -- destroys the clean non-engaged
+           pair, and is therefore a NEGATIVE CONTROL on third-party blindness: that
+           metric should degrade or go undefined under m04. If it does not move, the
+           metric is not measuring what it claims to.
 
 overlay:
   seats:
