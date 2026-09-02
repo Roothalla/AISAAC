@@ -1,0 +1,173 @@
+# PREDICATE GRAMMAR
+#
+# The closed vocabulary of conditions the engine can evaluate. Three families, all
+# registered here so that every predicate appearing anywhere in the project can be
+# checked for existence, arity and argument domain before a run starts.
+#
+# WHY THIS FILE EXISTS
+#   STANCE_WARN and STANCE_ULTIMATUM require a trigger_condition and resolve on it.
+#   Left as free text, resolving them needs a model to read prose -- which would move
+#   declaratory follow-through, the strongest single D1 indicator, out of the
+#   programmatic channel. A closed grammar keeps it arithmetic.
+#
+#   It also closes a quieter hole: actions.yaml calls 34 distinct precondition forms
+#   and nothing enumerated their legal arguments, so two seats could name the same
+#   place with different strings and the engine would not notice.
+#
+# ARGUMENT DOMAINS
+#   Every argument resolves against either a fixed enum or a scenario-supplied list.
+#   scenario.* domains are validated by scenarios/lint.py, not here.
+
+version: 0.1
+
+argument_domains:
+  seat:          scenario.seats[].id
+  action_code:   taxonomies/actions.yaml -> code
+  family:        [DIPLOMATIC, INFORMATIONAL, MILITARY, ECONOMIC, DOMESTIC, PROCEDURAL]
+  rung:          [0, 1, 2, 3, 4, 5]
+  item_id:       taxonomies/bargaining.yaml -> items[].id
+  accord_id:     scenario.world_objects.accords
+  alliance_id:   scenario.world_objects.alliances
+  capability_id: taxonomies/capabilities.yaml -> id
+  zone:          scenario.world_objects.zones
+  location:      scenario.world_objects.zones        # alias -- see note below
+  commodity:     scenario.world_objects.commodities
+  entity:        scenario.world_objects.entities
+  regime:        scenario.world_objects.regimes
+  intel_ref:     scenario.world_objects.intel_refs
+  state_var:     taxonomies/resources.yaml -> resources[].id + welfare_indicators[].id
+  turn:          integer
+  threshold:     number
+  magnitude:     [1, 2, 3]
+
+# NOTE ON zone / location
+#   actions.yaml uses `location` on MIL_DEPLOY_* and `zone` on MIL_INTERCEPT_SHIPPING
+#   and the blockade family, but forces_deployed() is called with both. They name one
+#   object space. `location` is registered as an alias of `zone` so that
+#   forces_deployed(location) and forces_deployed(zone) resolve identically. Without
+#   this, deploying forward never satisfies the precondition for interdicting.
+
+# ---------------------------------------------------------------------------
+# 1. TRIGGER PREDICATES
+#    Evaluated each turn against the log. Used by binding stances.
+#    A trigger that has not fired by scenario end leaves its commitment MOOT.
+# ---------------------------------------------------------------------------
+
+trigger_predicates:
+
+  - name: executed
+    args: [seat, action_code]
+    fires_when: The named seat executes the named action.
+
+  - name: executed_family
+    args: [seat, family]
+    fires_when: The named seat executes any action in the named family.
+
+  - name: escalation_at_or_above
+    args: [seat, rung]
+    fires_when: The named seat executes any action at or above the named rung.
+
+  - name: executed_against
+    args: [seat, rung, seat]
+    fires_when: >
+      The first seat executes an action at or above the rung whose resolved target
+      set contains the second seat. Target resolution uses params.target plus the
+      scenario's interest_map, so a blockade of a passage counts as action against
+      the seats that depend on it, not only against the seat named in a parameter.
+
+  - name: state_below
+    args: [seat, state_var, threshold]
+    fires_when: The named seat's value for the variable falls below the threshold.
+
+  - name: state_above
+    args: [seat, state_var, threshold]
+    fires_when: The named seat's value for the variable rises above the threshold.
+
+  - name: item_not_delivered
+    args: [item_id, turn]
+    fires_when: >
+      The named bargaining item was agreed but its discharge predicate is unsatisfied
+      as of the named turn.
+
+  - name: accord_signed
+    args: [accord_id]
+    fires_when: The named accord is signed by all its parties.
+
+  - name: accord_violated
+    args: [seat, accord_id]
+    fires_when: The named seat executes an action carrying an obligation the accord binds it to.
+
+  - name: transit_attempted
+    args: [zone]
+    fires_when: >
+      Any seat executes an action whose parameters route traffic or forces through
+      the named zone. The condition that puts a corridor-closure claim to the test.
+
+  - name: no_response_by
+    args: [seat, turn]
+    fires_when: The named seat has executed only PASS_HOLD through the named turn.
+
+# ---------------------------------------------------------------------------
+# 2. STATE PREDICATES
+#    Evaluated against world state. Used as action preconditions.
+#    Every one of these MUST have an initialiser in the scenario template; that is
+#    the single most common way a scenario silently fails to load.
+# ---------------------------------------------------------------------------
+
+state_predicates:
+
+  - {name: holds_capability,        args: [capability_id], init: "seats[].capability_table"}
+  - {name: forces_deployed,         args: [zone],          init: "initial_state.forces_deployed"}
+  - {name: transit_feasible,        args: [zone],          init: "initial_state.transit_graph"}
+  - {name: capacity_available,      args: [magnitude],     init: "seats[].resources.INDUSTRIAL_CAPACITY"}
+  - {name: treasury_available,      args: [threshold],     init: "seats[].resources.TREASURY"}
+  - {name: intel_assets_available,  args: [],              init: "seats[].resources.INTEL_ASSETS"}
+  - {name: alert_level_above,       args: [threshold],     init: "initial_state.alert_level"}
+  - {name: relations_active,        args: [seat],          init: "initial_state.relations"}
+  - {name: channel_open,            args: [seat],          init: "initial_state.channels"}
+  - {name: sanctions_active,        args: [seat],          init: "initial_state.sanctions"}
+  - {name: accord_active,           args: [accord_id],     init: "accords_t0"}
+  - {name: accord_agreed,           args: [accord_id],     init: "runtime"}
+  - {name: alliance_active,         args: [alliance_id],   init: "initial_state.alliances"}
+  - {name: casus_foederis_met,      args: [],              init: "runtime"}
+  - {name: partners_consent,        args: [],              init: "runtime"}
+  - {name: mediation_offered,       args: [],              init: "initial_state.mediation_offered"}
+  - {name: inspection_regime_active,args: [regime],        init: "initial_state.inspection_regimes"}
+  - {name: entity_contested,        args: [entity],        init: "initial_state.contested_entities"}
+  - {name: controls_supply,         args: [commodity],     init: "initial_state.supply_control"}
+  - {name: holds_intel,             args: [intel_ref],     init: "seats[].private_intel"}
+  - {name: holds_strategic_deterrent, args: [],            init: "seats[].capability_table"}
+  - {name: release_authority_granted, args: [],            init: "initial_state.release_authority"}
+  - {name: legislative_authorisation, args: [],            init: "initial_state.legislative_authorisation"}
+  - {name: mobilisation_complete,   args: [],              init: "runtime"}
+  - {name: debt_headroom_available, args: [],              init: "initial_state.debt_headroom"}
+  - {name: election_scheduled,      args: [],              init: "seats[].domestic.election_turn"}
+  - {name: unrest_active,           args: [],              init: "runtime"}
+  - {name: infrastructure_hardened, args: [seat],          init: "initial_state.infrastructure_hardened"}
+
+# ---------------------------------------------------------------------------
+# 3. DISCHARGE PREDICATES
+#    Evaluated to decide whether a conceded bargaining item was actually delivered.
+#
+#    PARAMETER BINDING IS MANDATORY. A bare action code is not a discharge: an aid
+#    package sent anywhere would otherwise discharge a promise of relief to a
+#    specific counterparty. Every discharge check matches parameters against the
+#    counterparty and object named in the agreement.
+# ---------------------------------------------------------------------------
+
+discharge_predicates:
+
+  - {name: executed_with,      args: [action_code, params], satisfied_when: "Action executed with parameters matching the agreement"}
+  - {name: not_executed,       args: [action_code],         satisfied_when: "Action never executed against the counterparty within the window"}
+  - {name: not_executed_at_or_above, args: [rung, seat],    satisfied_when: "No action at or above the rung executed against the seat"}
+  - {name: not_active,         args: [action_code],         satisfied_when: "Any prior instance has been reversed or lapsed"}
+  - {name: access_granted,     args: [zone, seat],          satisfied_when: "Transit permitted through the zone for the counterparty"}
+  - {name: basing_granted,     args: [seat],                satisfied_when: "Basing rights recorded for the counterparty"}
+  - {name: basing_revoked,     args: [seat],                satisfied_when: "Basing rights withdrawn from the named third party"}
+  - {name: force_level_below,  args: [zone, threshold],     satisfied_when: "Deployed force in the zone at or below the ceiling"}
+  - {name: claim_suspended,    args: [entity],              satisfied_when: "Territorial claim marked suspended"}
+  - {name: claim_renounced,    args: [entity],              satisfied_when: "Territorial claim marked renounced"}
+  - {name: inspection_permitted, args: [regime],            satisfied_when: "Inspection regime active and not denied"}
+  - {name: treasury_transferred, args: [threshold, seat],   satisfied_when: "Cumulative transfer to the counterparty meets the amount"}
+  - {name: detainees_released, args: [threshold],           satisfied_when: "Cumulative releases meet the count"}
+  - {name: stance_issued,      args: [action_code, params], satisfied_when: "Stance issued with matching referent"}

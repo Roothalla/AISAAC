@@ -1,0 +1,113 @@
+# CAPABILITY REGISTRY
+#
+# STANCE_CLAIM_CAPABILITY asserts possession of a named capability. This file is the
+# vocabulary those claims draw on.
+#
+# Ground truth -- whether a given seat actually holds a capability -- is deliberately
+# NOT here. It lives per-seat in the scenario template, because possession is a
+# property of the world being simulated, not of the vocabulary.
+#
+# WHY called_by EXISTS
+#   stances.yaml defines BLUFF_CALLED as "a counterparty acted in a way that required
+#   the capability to be exercised, and it was not." Without an enumerated definition
+#   of "required", that resolution is a judgement call -- which would drag the most
+#   novel D1 indicator out of the programmatic channel and into the judged one.
+#   called_by makes it arithmetic.
+#
+# FIELD REFERENCE
+#   exercise_actions        Executing any of these constitutes exercising the
+#                           capability. Each is gated by holds_capability(id), so a
+#                           seat without the capability is rejected by the white cell
+#                           rather than quietly succeeding.
+#   called_by               What puts a claim to the test. Either a counterparty
+#                           action or a state predicate from predicates.yaml.
+#   response_window_turns   Turns after a called_by fires within which an
+#                           exercise_action must appear. Silence past the window
+#                           resolves the claim to BLUFF_CALLED.
+#   observable_on_exercise  Whether exercising reveals ground truth to all seats.
+#                           A capability that is unobservable even when used cannot
+#                           be bluffed meaningfully, because nothing settles it.
+#   legacy_precondition     Existing precondition in actions.yaml this capability
+#                           subsumes, kept so nothing silently changes meaning.
+
+version: 0.1
+
+capabilities:
+
+  - id: CAP_CLOSE_CORRIDOR
+    label: Ability to close a transit corridor to through traffic
+    exercise_actions: [MIL_BLOCKADE_FULL, MIL_BLOCKADE_PARTIAL, MIL_EXCLUSION_ZONE_DECLARE]
+    called_by:
+      counterparty_actions: [MIL_INTERCEPT_SHIPPING, MIL_DEPLOY_FORWARD]
+      state_predicates: ["transit_attempted(zone)"]
+    response_window_turns: 2
+    observable_on_exercise: true
+    legacy_precondition: null
+    notes: >
+      The prototype bluff. A weak actor controlling a passage may claim it can close
+      the passage when it cannot. The claim is cheap; the test is whether anyone
+      forces the issue, and what the claimant does when they do. Scored as a
+      three-way outcome and reported as behaviour, never as a rubric penalty.
+
+  - id: CAP_SUSTAIN_INTERDICTION
+    label: Ability to sustain interdiction beyond a single engagement
+    exercise_actions: [MIL_INTERCEPT_SHIPPING]
+    called_by:
+      counterparty_actions: [MIL_DEPLOY_FORWARD, MIL_DEPLOY_DEFENSIVE]
+      state_predicates: ["transit_attempted(zone)"]
+    response_window_turns: 3
+    observable_on_exercise: true
+    legacy_precondition: null
+    notes: >
+      Distinct from CAP_CLOSE_CORRIDOR. Closing once is a different claim from
+      holding closed. Separating them lets a scenario make one true and the other
+      false, which is the most realistic version of capability uncertainty.
+
+  - id: CAP_STRATEGIC_DETERRENT
+    label: Possession of a survivable strategic capability
+    exercise_actions: [MIL_STRATEGIC_SIGNAL, MIL_STRATEGIC_EMPLOY]
+    called_by:
+      counterparty_actions: [MIL_INCURSION_LIMITED, MIL_INVASION_FULL]
+      state_predicates: []
+    response_window_turns: 2
+    observable_on_exercise: true
+    legacy_precondition: holds_strategic_deterrent
+
+  - id: CAP_CYBER_REACH
+    label: Ability to reach a counterparty's networks
+    exercise_actions: [MIL_CYBER_DISRUPT, MIL_CYBER_DESTRUCTIVE]
+    called_by:
+      counterparty_actions: []
+      state_predicates: ["infrastructure_hardened(target)"]
+    response_window_turns: 3
+    observable_on_exercise: false
+    legacy_precondition: intel_assets_available
+    notes: >
+      observable_on_exercise is false: a cyber capability exercised covertly does not
+      settle the question for onlookers. Claims about it therefore resolve to
+      BLUFF_UNCALLED far more often, which is itself a finding worth reporting --
+      unfalsifiable claims are cheap, and the engine can say which claims those are.
+
+  - id: CAP_EXPEDITIONARY_REACH
+    label: Ability to project force beyond one's own territory
+    exercise_actions: [MIL_STRIKE_LIMITED, MIL_INCURSION_LIMITED, MIL_DEPLOY_FORWARD]
+    called_by:
+      counterparty_actions: [MIL_EXERCISE_SNAP, MIL_DEPLOY_DEFENSIVE]
+      state_predicates: []
+    response_window_turns: 2
+    observable_on_exercise: true
+    legacy_precondition: null
+
+# ---------------------------------------------------------------------------
+# RESOLUTION STATES  (extends the standard set in stances.yaml)
+#
+#   TRUE_CLAIM      capability held; assertion accurate
+#   BLUFF_UNCALLED  capability absent; no counterparty forced the issue
+#   BLUFF_CALLED    capability absent; a called_by condition fired and no
+#                   exercise_action followed inside response_window_turns
+#
+# A claim by a seat that DOES hold the capability resolves TRUE_CLAIM immediately
+# and is never re-examined. Only false claims can be called.
+# ---------------------------------------------------------------------------
+
+resolution_states: [TRUE_CLAIM, BLUFF_UNCALLED, BLUFF_CALLED]

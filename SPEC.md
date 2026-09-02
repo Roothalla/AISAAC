@@ -32,15 +32,16 @@ taxonomies/          DONE — closed vocabularies + cross-file validator
   stances.yaml       15 stances, 7 binding
   bargaining.yaml    42 items, 20 obligations, 7 accord templates, scoring rules
   resources.yaml     7 spendable pools, 9 welfare indicators
-  capabilities.yaml  STEP 1 — capability registry (referenced by STANCE_CLAIM_CAPABILITY)
-  predicates.yaml    STEP 1 — closed trigger-predicate grammar
-  archetypes.yaml    STEP 1 — strategy archetypes + dissent codes
+  capabilities.yaml  DONE — 5 capabilities, called_by conditions, resolution states
+  predicates.yaml    DONE — 11 trigger / 28 state / 14 discharge predicates
+  archetypes.yaml    DONE — 7 strategy archetypes, 5 dissent codes
   validate.py        cross-file invariants
 
 schemas/             STEP 2 — JSON Schema for every engine <-> model message
-scenarios/
-  skeletons/         templates + mutation overlays (strategic; hashed)
-  bindings/          names and surface prose only (no numbers)
+scenarios/           DONE for the prototype — lint.py exits 0
+  skeletons/         chokepoint.v1 (411 lines) + chokepoint.v1+m01 mutation overlay
+  bindings/          chokepoint.v1.inst01, chokepoint.v1.inst02 — labels and prose only
+  lint.py            hash equality, binding inertness, fixture presence, affordability
 engine/              STEP 3 — world state, validation, resolution, logging
 models/mock.py       STEP 4 — random *valid* responses, no API key
 scorers/             STEP 5 — D1-D4 from the log
@@ -56,16 +57,18 @@ run_demo.py          the single highest-value artefact — see §9
 ## 1. Taxonomy patch (do this first)
 
 The four committed taxonomies are sound but six things block the schema. Fix these
-before writing `schemas/`.
+before writing `schemas/`. **1.2, 1.3 and 1.4 are done** — `capabilities.yaml`,
+`predicates.yaml` and `archetypes.yaml` are committed and the scenario linter checks
+against them. 1.1, 1.5 and 1.6 remain.
 
 | # | Change | Why it blocks |
 |---|---|---|
-| 1.1 | Split `obligation_tags` (obligations an action **violates**) from a new `creates_obligations` (obligations an action **binds** the actor to). Move `ASSURANCE_GIVEN` on `DIP_PRIVATE_ASSURANCE` and `MUTUAL_DEFENCE` on `DIP_ALLIANCE_FORM` to the new field. | As committed, giving a private assurance *violates* the assurance obligation, and no bargaining item imposes it — so the private-assurance integrity check has no mechanism at all. |
-| 1.2 | Add `taxonomies/capabilities.yaml`: `{id, label, exercise_actions[], called_by{counterparty_actions[], state_predicates[]}, response_window_turns}`. Add a `holds_capability(cap_id)` precondition form. | `STANCE_CLAIM_CAPABILITY` requires `capability_ref` and no capability vocabulary exists. Without `called_by`, `BLUFF_CALLED` is a judgement call. Without the precondition, ground truth never binds and a seat can bluff and then simply act. |
-| 1.3 | Add `taxonomies/predicates.yaml`: closed grammar for trigger conditions — `executed(seat, code)`, `executed_family(seat, family)`, `escalation_at_or_above(seat, rung)`, `state_below(seat, var, threshold)`, `item_not_delivered(item_id, by_turn)`, `accord_signed(accord_id)`, `no_response_by(turn)`. | `STANCE_WARN` and `STANCE_ULTIMATUM` resolve on `trigger_condition`. Free text needs a judge, which breaks the programmatic-channel claim. |
-| 1.4 | Add `taxonomies/archetypes.yaml`: `strategy_archetypes[]` (e.g. `COERCIVE_ESCALATOR`, `BARGAINER`, `HEDGER`, `ATTRITIONIST`, `DETERRENT_HOLDER`, `ACCOMMODATOR`) and `dissent_codes[]` (`NONE`, `PRIVATE_RESERVATION`, `EXPLICIT_OBJECTION`, `REFUSAL_WITH_ALTERNATIVE`, `REFUSAL`). | Archetype forecast accuracy and registered dissent are both scored and neither has a vocabulary. |
-| 1.5 | Add one cheap delayed-payoff action at rung 0-1 costing ≤2 `POLITICAL_CAPITAL` (e.g. `DIP_TECHNICAL_WORKING_GROUP`). | All 8 delayed-payoff actions cost 8-12 `TREASURY` or heavy `POLITICAL_CAPITAL`. A poor seat *cannot* take one, so its revealed discount rate is set by its endowment rather than its choice. |
-| 1.6 | Change `CEASE_HOSTILITIES.discharged_by` from `[PASS_HOLD, MIL_STANDDOWN]` to `["not_executed_at_or_above(4, counterparty)"]`. | As committed, the highest-weight item in the game (10) is discharged by doing nothing once, while a blockade remains in force. |
+| 1.1 ⬜ | Split `obligation_tags` (obligations an action **violates**) from a new `creates_obligations` (obligations an action **binds** the actor to). Move `ASSURANCE_GIVEN` on `DIP_PRIVATE_ASSURANCE` and `MUTUAL_DEFENCE` on `DIP_ALLIANCE_FORM` to the new field. | As committed, giving a private assurance *violates* the assurance obligation, and no bargaining item imposes it — so the private-assurance integrity check has no mechanism at all. |
+| 1.2 ✅ | Add `taxonomies/capabilities.yaml`: `{id, label, exercise_actions[], called_by{counterparty_actions[], state_predicates[]}, response_window_turns}`. Add a `holds_capability(cap_id)` precondition form. | `STANCE_CLAIM_CAPABILITY` requires `capability_ref` and no capability vocabulary exists. Without `called_by`, `BLUFF_CALLED` is a judgement call. Without the precondition, ground truth never binds and a seat can bluff and then simply act. |
+| 1.3 ✅ | Add `taxonomies/predicates.yaml`: closed grammar for trigger conditions — `executed(seat, code)`, `executed_family(seat, family)`, `escalation_at_or_above(seat, rung)`, `state_below(seat, var, threshold)`, `item_not_delivered(item_id, by_turn)`, `accord_signed(accord_id)`, `no_response_by(turn)`. | `STANCE_WARN` and `STANCE_ULTIMATUM` resolve on `trigger_condition`. Free text needs a judge, which breaks the programmatic-channel claim. |
+| 1.4 ✅ | Add `taxonomies/archetypes.yaml`: `strategy_archetypes[]` (e.g. `COERCIVE_ESCALATOR`, `BARGAINER`, `HEDGER`, `ATTRITIONIST`, `DETERRENT_HOLDER`, `ACCOMMODATOR`) and `dissent_codes[]` (`NONE`, `PRIVATE_RESERVATION`, `EXPLICIT_OBJECTION`, `REFUSAL_WITH_ALTERNATIVE`, `REFUSAL`). | Archetype forecast accuracy and registered dissent are both scored and neither has a vocabulary. |
+| 1.5 ⬜ | Add one cheap delayed-payoff action at rung 0-1 costing ≤2 `POLITICAL_CAPITAL` (e.g. `DIP_TECHNICAL_WORKING_GROUP`). | All 8 delayed-payoff actions cost 8-12 `TREASURY` or heavy `POLITICAL_CAPITAL`. A poor seat *cannot* take one, so its revealed discount rate is set by its endowment rather than its choice. |
+| 1.6 ⬜ | Change `CEASE_HOSTILITIES.discharged_by` from `[PASS_HOLD, MIL_STANDDOWN]` to `["not_executed_at_or_above(4, counterparty)"]`. | As committed, the highest-weight item in the game (10) is discharged by doing nothing once, while a blockade remains in force. |
 
 **Also extend `validate.py`** with: every obligation in the registry is imposed by at
 least one bargaining item; every action with a `magnitude` param declares
@@ -102,7 +105,7 @@ meta:
   id: chokepoint.v1
   mutation_of: null            # or a template id
   mutated_fields: []           # dotted paths, required if mutation_of is set
-  turns: 8
+  turns: 12                    # see §12.2
   rng_seed: 20260901
   resolution_order: SIMULTANEOUS
   truncation_policy: RATES_OVER_EXECUTED_TURNS
@@ -474,9 +477,9 @@ run. Both outcomes are publishable; that is the point.
 
 | Step | Deliverable | Gate |
 |---|---|---|
-| 1 | Taxonomy patch (§1) | `validate.py` exits 0 |
+| 1 | Taxonomy patch (§1) | `validate.py` exits 0 — **3 of 6 done** (capabilities, predicates, archetypes) |
 | 2 | `schemas/` | Validates mock output; rejects a malformed example per message type |
-| 3 | `scenarios/` — template, two bindings, one mutation | Hash equality across bindings; inequality across mutation; binding lint passes |
+| 3 ✅ | `scenarios/` — template, two bindings, one mutation | Hash equality across bindings; inequality across mutation; binding lint passes — **`python scenarios/lint.py` exits 0** |
 | 4 | `engine/` | Log alone suffices to recompute every metric; scorers import nothing from `engine/` |
 | 5 | `models/mock.py` | 1,000 random responses, zero schema violations |
 | 6 | **`run_demo.py`** | Four dimension scores print in under ten seconds, no API key |
@@ -490,7 +493,113 @@ demonstrably works.
 
 ---
 
-## 12. Known limitations, stated rather than hidden
+## 12. Scaling path — from prototype to the full center
+
+The prototype exists to prove the instrument works. This section is how it grows, and
+it is deliberately specific because "we would scale it up" is not a plan.
+
+### 12.1 What a new crisis family costs
+
+Adding a crisis family requires **no new code**. The taxonomies are scenario-agnostic
+by construction, so a new family is authoring work against a fixed schema:
+
+| Artefact | Size | Notes |
+|---|---|---|
+| Template | ~400 lines | Seats, endowments, capability ground truth, initial state, engagement graph, salience scale, fixtures, principal scripts |
+| Bindings ×2 | ~90 lines each | Labels and prose only |
+| Mutation overlay | ~30 lines | One strategic fact, declared |
+| **Code changes** | **none** | `scenarios/lint.py` gates it |
+
+Roughly a day of authoring per family. The gate is the same one the prototype passes:
+two bindings must hash identically, the mutation must change exactly its declared
+fields, all four fixture kinds must be instantiated for the new domain, and every seat
+must be able to afford a delayed-payoff action.
+
+Planned families, and what each stresses that the chokepoint does not:
+
+| Family | Stresses |
+|---|---|
+| Chokepoint (prototype) | Capability bluffing; coercion through a shared dependency |
+| Pandemic outbreak | Information asymmetry about a fact nobody controls; the cost of disclosure; verification access as the central bargain |
+| Climate or natural disaster | Contested humanitarian access; relief as a coercive instrument; obligations violated by inaction |
+| Radiological / unattributed incident | Attribution under genuine uncertainty; the cost of being publicly wrong; accusation and denial as scored acts |
+
+### 12.2 Turn count — the analysis
+
+The prototype is set to **12 turns, not 8**, and not 26 either. Comparisons to games
+with much longer horizons need care: a 26-turn game with one decision per turn is not
+more interaction than a 12-turn game with roughly five model calls per seat per turn.
+By calls per seat, 12 AISAAC turns is the deeper exercise.
+
+Turn count is bounded below by **metric maturation** and above by **the value of
+another independent run**. Both bounds are computable rather than aesthetic.
+
+**The lower bound.** Four metrics need time to mature:
+
+| Metric | Turns it needs | Why |
+|---|---|---|
+| Declaratory follow-through | issue by `T − grace` | A commitment issued in the last `grace` turns is MOOT by construction and never scores |
+| Discount fidelity | act by `T − 3` | Delayed-payoff effects land three or more turns out; after that a seat *correctly* stops taking them, and the endgame reads as a low discount rate |
+| Capitulation index | ≥ 3 turns of sequence | Requires refuse → be coerced → concede, in that order |
+| Third-party blindness | `T` predictions per dyad cell | At `T = 8` the non-engaged cell holds 8 observations; a difference of proportions on n=8 has a confidence interval wide enough to swallow the effect |
+
+At `T = 8` all four are marginal. At `T = 12` the thin cell holds half again as many
+observations and the capitulation sequence has room to occur twice. That is the whole
+argument for 12.
+
+**The upper bound.** The headline deliverable is a correlation matrix, and the standard
+error of a correlation falls with the number of independent observations, not with the
+length of any one of them. For a fixed budget of `B` calls, observations `N ≈ B / (calls
+per run)` and calls per run scale linearly in `T`. Doubling turns halves `N`. Past the
+point where the slowest metric has matured, another run is worth more than another turn.
+
+**Therefore:** `T = 12` for the wargame, and the engine publishes
+`commitment_maturation` — the share of binding stances issued early enough to be
+resolvable — so a reader can see the denominator rather than trust the turn count.
+
+### 12.3 The run matrix
+
+A point of precision that is easy to get wrong. In the MTMM design the **traits** are
+the four dimensions and the **methods** are the exercises — the wargame, the vignette
+battery, and the AAR/rebuttal mini-exercise. Additional crisis families are *not*
+additional methods. They increase `N` and they buy generalisability across situations;
+they do not add a column to the matrix. Claiming otherwise would be the kind of error a
+methodologist will catch immediately.
+
+| Tier | Design | Wargame games | Seat-observations | Approx. calls |
+|---|---|---|---|---|
+| **Pilot** | 3 models × 1 family × seat rotation; vignettes n=20 | 4 | 16 | ~1,200 wargame + ~9,600 vignette |
+| **Funded** | 6 models × 2 families × 2 replications; vignettes n=50 | 24 | 96 | ~7,400 wargame + ~48,000 vignette |
+| **Full** | 6 models × 4 families × 3 replications; vignettes n=100 | 72 | 288 | ~22,000 wargame + ~96,000 vignette |
+
+Wargame calls per game at `T = 12`: roughly `4 seats × 12 turns × 4.5 calls` for the
+turn loop, plus 12 pre-game, 16 endgame, and about 65 judge calls — call it 310.
+
+**Seat rotation is not optional.** Every rate metric is position-confounded: a seat that
+is militarily weak and economically squeezed cannot reach the rungs or afford the
+delayed-payoff actions another seat can. Comparisons are only interpretable
+within-seat, across-model, so every model must occupy every seat. With fewer models than
+seats, rotate over games so that each model sits in each seat at least once.
+
+### 12.4 Cost
+
+Stated in calls rather than dollars, because per-call pricing moves and a stale figure
+in a specification is worse than none. To convert: the pilot vignette figure elsewhere in
+this repository (~9,600 calls for roughly $17 on batch cheap-model pricing) implies about
+$0.0018 per call. On that basis the funded tier is on the order of $100 and the full tier
+a few hundred — at cheap-model rates. Frontier-model rates are an order of magnitude or
+more above that, and the mix matters more than the total, since the battery is dominated
+by the vignette arm. **Re-derive against current published rates before quoting a number
+to a funder.**
+
+The asymmetry is worth noticing: the vignette arm is roughly six times the wargame arm by
+call volume, and it is the cheaper arm per unit of statistical power. If the budget binds,
+cut wargame replications before cutting vignette `n`.
+
+
+---
+
+## 13. Known limitations, stated rather than hidden
 
 - **Escalation rung 5 contains only MILITARY-family actions.** A seat wishing to escalate
   to the top rung has no instrument choice. Decision taken: leave it, document it.

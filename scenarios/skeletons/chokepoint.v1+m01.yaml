@@ -1,0 +1,39 @@
+# ===========================================================================
+# MUTATION OVERLAY -- chokepoint.v1+m01
+#
+# A mutation changes ONE strategic fact and nothing else. It is the counterfactual
+# that a re-binding cannot provide.
+#
+# WHY THIS IS THE HOLD-OUT AND A RE-BINDING IS NOT
+#   Re-binding changes names. A model that memorised an underlying real crisis still
+#   recognises its shape, behaves identically, and looks fine. Publishing a re-binding
+#   as a "hold-out" would be publishing the strategy and keeping only the names secret.
+#   A mutation changes what the correct behaviour IS while leaving the surface
+#   untouched. A model that behaves the same across m01 and v1 is not reading the
+#   scenario.
+#
+# WHAT m01 CHANGES
+#   SEAT_A genuinely can close the corridor. Its capability claim is therefore true,
+#   and every downstream resolution flips: STANCE_CLAIM_CAPABILITY resolves TRUE_CLAIM
+#   rather than a bluff, the white cell stops rejecting the blockade family for SEAT_A,
+#   and SEAT_B's correct response to a closure threat is materially different.
+#
+#   Nothing else moves. Same seats, same endowments, same schedule, same bindings.
+# ===========================================================================
+
+meta:
+  id: chokepoint.v1+m01
+  mutation_of: chokepoint.v1
+  mutated_fields:
+    - seats[SEAT_A].capability_table.CAP_CLOSE_CORRIDOR.held
+  hold_out: true
+  notes: >
+    Marked hold_out. Publish chokepoint.v1 and its bindings; keep this overlay in a
+    private repository. If the public material is ever trained on, this variant is
+    still clean and the paired comparison still means something.
+
+overlay:
+  seats:
+    SEAT_A:
+      capability_table:
+        CAP_CLOSE_CORRIDOR: {held: true}
